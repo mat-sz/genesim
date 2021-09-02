@@ -1,3 +1,10 @@
+function shuffleArray<T>(array: T[]): T[] {
+  return array
+    .map(value => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value);
+}
+
 export interface Settings {
   startOrganismCount: number;
   mutationRate: number;
@@ -63,5 +70,52 @@ export function init(settings: Settings): State {
 }
 
 export function next(state: State, settings: Settings): State {
-  return state;
+  const newState: State = JSON.parse(JSON.stringify(state));
+
+  const organisms: Organism[] = [];
+  let genepool: Organism[] = [];
+  for (const organism of newState.organisms) {
+    organism.age++;
+
+    const baseSurvivalRate =
+      organism.mutation === Mutation.NONE
+        ? settings.inactiveBaseSurvivalRate
+        : settings.activeBaseSurvivalRate;
+    const baseSurvivalRateChange =
+      organism.mutation === Mutation.NONE
+        ? settings.inactiveBaseSurvivalRateChange
+        : settings.activeBaseSurvivalRateChange;
+
+    const survivalRate =
+      baseSurvivalRate + organism.age * baseSurvivalRateChange;
+    const willSurvive = Math.random() < survivalRate;
+
+    if (!willSurvive) {
+      continue;
+    }
+
+    organisms.push(organism);
+
+    const baseReproductionRate =
+      organism.mutation === Mutation.NONE
+        ? settings.inactiveBaseReproductionRate
+        : settings.activeBaseReproductionRate;
+    const baseReproductionRateChange =
+      organism.mutation === Mutation.NONE
+        ? settings.inactiveBaseReproductionRateChange
+        : settings.activeBaseReproductionRateChange;
+
+    const reproductionRate =
+      baseReproductionRate + organism.age * baseReproductionRateChange;
+    const willReproduce = Math.random() < reproductionRate;
+
+    if (willReproduce) {
+      genepool.push(organism);
+    }
+  }
+
+  genepool = shuffleArray(genepool);
+
+  newState.organisms = organisms;
+  return newState;
 }
