@@ -116,6 +116,55 @@ export function next(state: State, settings: Settings): State {
 
   genepool = shuffleArray(genepool);
 
+  if (genepool.length >= 2) {
+    if (genepool.length % 2 === 1) {
+      genepool.pop();
+    }
+
+    for (let i = 0; i < genepool.length; i += 2) {
+      let mutation = Mutation.NONE;
+      const firstParent = genepool[i];
+      const secondParent = genepool[i + 1];
+
+      let firstAllelMutated = false;
+      let secondAllelMutated = false;
+
+      switch (firstParent.mutation) {
+        case Mutation.BOTH:
+          firstAllelMutated = true;
+          break;
+        case Mutation.ONE:
+          firstAllelMutated = Math.random() < 0.5;
+          break;
+      }
+
+      switch (secondParent.mutation) {
+        case Mutation.BOTH:
+          secondAllelMutated = true;
+          break;
+        case Mutation.ONE:
+          secondAllelMutated = Math.random() < 0.5;
+          break;
+      }
+
+      if (firstAllelMutated && secondAllelMutated) {
+        mutation = Mutation.BOTH;
+      } else if (firstAllelMutated || secondAllelMutated) {
+        mutation = Mutation.ONE;
+      }
+
+      const organism: Organism = {
+        id: state.currentId++,
+        age: 0,
+        mutation,
+        x: Math.random(),
+        y: Math.random(),
+      };
+
+      organisms.push(organism);
+    }
+  }
+
   newState.organisms = organisms;
   return newState;
 }
