@@ -1,4 +1,14 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+
 import './App.scss';
 import { init, Mutation, next, Settings } from './simulation';
 
@@ -15,21 +25,31 @@ const defaultSettings: Settings = {
   activeBaseReproductionRateChange: 0.01,
 };
 
+interface Stats {
+  time: number;
+  mutationNone: number;
+  mutationOne: number;
+  mutationBoth: number;
+  total: number;
+}
+
 export const App: React.FC = () => {
   const [state, setState] = useState(init(defaultSettings));
   const [time, setTime] = useState(0);
+  const [history, setHistory] = useState<Stats[]>([]);
 
   const reset = useCallback(() => {
     setState(init(defaultSettings));
     setTime(0);
-  }, [setState, setTime]);
+    setHistory([]);
+  }, [setState, setTime, setHistory]);
 
   const step = useCallback(() => {
     setState(state => next(state, defaultSettings));
     setTime(time => time + 1);
   }, [setState, setTime]);
 
-  const stats = useMemo(() => {
+  const stats: Stats = useMemo(() => {
     let mutationNone = 0;
     let mutationOne = 0;
     let mutationBoth = 0;
@@ -52,12 +72,19 @@ export const App: React.FC = () => {
     }
 
     return {
+      time,
       mutationNone,
       mutationOne,
       mutationBoth,
       total,
     };
-  }, [state]);
+  }, [state, time]);
+
+  useEffect(() => {
+    setHistory(history =>
+      [...history, stats].slice(history.length > 15 ? history.length - 15 : 0)
+    );
+  }, [stats, setHistory]);
 
   return (
     <div className="simulation">
@@ -70,10 +97,10 @@ export const App: React.FC = () => {
             r={0.005}
             fill={
               organism.mutation === Mutation.NONE
-                ? '#000'
+                ? '#8884d8'
                 : organism.mutation === Mutation.BOTH
-                ? '#f00'
-                : '#ff0'
+                ? '#ffc658'
+                : '#82ca9d'
             }
           ></circle>
         ))}
@@ -92,6 +119,35 @@ export const App: React.FC = () => {
         <div>
           <button onClick={step}>Step</button>
           <button onClick={reset}>Reset</button>
+        </div>
+        <div>
+          <AreaChart width={500} height={400} data={history}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="time" />
+            <YAxis />
+            <Tooltip />
+            <Area
+              type="monotone"
+              dataKey="mutationNone"
+              stackId="1"
+              stroke="#8884d8"
+              fill="#8884d8"
+            />
+            <Area
+              type="monotone"
+              dataKey="mutationOne"
+              stackId="1"
+              stroke="#82ca9d"
+              fill="#82ca9d"
+            />
+            <Area
+              type="monotone"
+              dataKey="mutationBoth"
+              stackId="1"
+              stroke="#ffc658"
+              fill="#ffc658"
+            />
+          </AreaChart>
         </div>
       </div>
     </div>
