@@ -6,7 +6,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
 } from 'recharts';
 
 import './App.scss';
@@ -87,40 +86,28 @@ export const App: React.FC = () => {
   }, [stats, setHistory]);
 
   return (
-    <div className="simulation">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1">
-        {state.organisms.map(organism => (
-          <circle
-            key={organism.id}
-            cx={organism.x}
-            cy={organism.y}
-            r={0.005}
-            fill={
-              organism.mutation === Mutation.NONE
-                ? '#8884d8'
-                : organism.mutation === Mutation.BOTH
-                ? '#ffc658'
-                : '#82ca9d'
-            }
-          ></circle>
-        ))}
-      </svg>
-      <div className="controls">
-        <div>Time: {time}</div>
-        <div>
-          None: {stats.mutationNone} (
-          {Math.round((stats.mutationNone / stats.total) * 100)}%), one:{' '}
-          {stats.mutationOne} (
-          {Math.round((stats.mutationOne / stats.total) * 100)}%), both:{' '}
-          {stats.mutationBoth} (
-          {Math.round((stats.mutationBoth / stats.total) * 100)}%), total:{' '}
-          {stats.total}
+    <div>
+      <div className="main">
+        <div className="simulation">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1">
+            {state.organisms.map(organism => (
+              <circle
+                key={organism.id}
+                cx={organism.x}
+                cy={organism.y}
+                r={0.005}
+                fill={
+                  organism.mutation === Mutation.NONE
+                    ? '#8884d8'
+                    : organism.mutation === Mutation.BOTH
+                    ? '#ffc658'
+                    : '#82ca9d'
+                }
+              ></circle>
+            ))}
+          </svg>
         </div>
-        <div>
-          <button onClick={step}>Step</button>
-          <button onClick={reset}>Reset</button>
-        </div>
-        <div>
+        <div className="chart">
           <AreaChart width={500} height={400} data={history}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="time" />
@@ -148,6 +135,22 @@ export const App: React.FC = () => {
               fill="#ffc658"
             />
           </AreaChart>
+        </div>
+      </div>
+      <div className="controls">
+        <div>Time: {time}</div>
+        <div>
+          None: {stats.mutationNone} (
+          {Math.round((stats.mutationNone / stats.total) * 100)}%), one:{' '}
+          {stats.mutationOne} (
+          {Math.round((stats.mutationOne / stats.total) * 100)}%), both:{' '}
+          {stats.mutationBoth} (
+          {Math.round((stats.mutationBoth / stats.total) * 100)}%), total:{' '}
+          {stats.total}
+        </div>
+        <div>
+          <button onClick={step}>Step</button>
+          <button onClick={reset}>Reset</button>
         </div>
       </div>
     </div>
