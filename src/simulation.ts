@@ -154,7 +154,7 @@ export function next(state: State, settings: Settings): State {
       }
 
       const organism: Organism = {
-        id: state.currentId++,
+        id: newState.currentId++,
         age: 0,
         mutation,
         x: Math.random(),
